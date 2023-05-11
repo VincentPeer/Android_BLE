@@ -23,7 +23,16 @@ class DMABleManager(applicationContext: Context, private val dmaServiceListener:
     }
 
 
-    private var requiredServices = listOf<BluetoothGattService?>(timeService, symService)
+    private var servicesMap = mutableMapOf(
+        timeServiceUUID to timeService,
+        symServiceUUID to symService
+    )
+    private var charMap = mutableMapOf(
+        currentTimeCharUUID to currentTimeChar,
+        integerCharUUID to integerChar,
+        temperatureCharUUID to temperatureChar,
+        buttonClickCharUUID to buttonClickChar
+    )
     override fun isRequiredServiceSupported(gatt: BluetoothGatt): Boolean {
 
         Log.d(TAG, "isRequiredServiceSupported - discovered services:")
@@ -31,22 +40,14 @@ class DMABleManager(applicationContext: Context, private val dmaServiceListener:
             Log.d(TAG, service.uuid.toString())
             val bluetoothGattService = BluetoothGattService(service.uuid, service.type)
 
-            when(bluetoothGattService.uuid) {
-                timeServiceUUID -> timeService = bluetoothGattService
-                symServiceUUID -> symService = bluetoothGattService
-                else -> continue
-            }
+            servicesMap[service.uuid] = bluetoothGattService
 
 
             for (characteristic in service.characteristics) {
                 Log.d(TAG, characteristic.uuid.toString())
                 val bluetoothGattCharacteristic = BluetoothGattCharacteristic(characteristic.uuid, characteristic.properties, characteristic.permissions)
 
-                when(bluetoothGattCharacteristic.uuid) {
-                    timeServiceUUID -> timeService = bluetoothGattService
-                    symServiceUUID -> symService = bluetoothGattService
-                    else -> continue
-                }
+                charMap[characteristic.uuid] = bluetoothGattCharacteristic
 
 
             }
