@@ -22,19 +22,44 @@ class DMABleManager(applicationContext: Context, private val dmaServiceListener:
         this.disconnect().enqueue()
     }
 
+
+    private var requiredServices = listOf<BluetoothGattService?>(timeService, symService)
     override fun isRequiredServiceSupported(gatt: BluetoothGatt): Boolean {
 
         Log.d(TAG, "isRequiredServiceSupported - discovered services:")
         for (service in gatt.services) {
             Log.d(TAG, service.uuid.toString())
+            val bluetoothGattService = BluetoothGattService(service.uuid, service.type)
+
+            when(bluetoothGattService.uuid) {
+                timeServiceUUID -> timeService = bluetoothGattService
+                symServiceUUID -> symService = bluetoothGattService
+                else -> continue
+            }
+
+
+            for (characteristic in service.characteristics) {
+                Log.d(TAG, characteristic.uuid.toString())
+                val bluetoothGattCharacteristic = BluetoothGattCharacteristic(characteristic.uuid, characteristic.properties, characteristic.permissions)
+
+                when(bluetoothGattCharacteristic.uuid) {
+                    timeServiceUUID -> timeService = bluetoothGattService
+                    symServiceUUID -> symService = bluetoothGattService
+                    else -> continue
+                }
+
+
+            }
         }
 
+
+
         /* TODO
-        - Nous devons vérifier ici que le périphérique auquel on vient de se connecter possède
-          bien tous les services et les caractéristiques attendus, on vérifiera aussi que les
-          caractéristiques présentent bien les opérations attendues
-        - On en profitera aussi pour garder les références vers les différents services et
-          caractéristiques (déclarés en lignes 14 à 19)
+            - Nous devons vérifier ici que le périphérique auquel on vient de se connecter possède
+              bien tous les services et les caractéristiques attendus, on vérifiera aussi que les
+              caractéristiques présentent bien les opérations attendues
+            - On en profitera aussi pour garder les références vers les différents services et
+              caractéristiques (déclarés en lignes 14 à 19)
         */
 
         return false //FIXME si tout est OK, on doit retourner true
@@ -78,6 +103,12 @@ class DMABleManager(applicationContext: Context, private val dmaServiceListener:
 
     companion object {
         private val TAG = DMABleManager::class.java.simpleName
+        private val timeServiceUUID = UUID.fromString("00001805-0000-1000-8000-00805f9b34fb")
+        private val symServiceUUID =  UUID.fromString("3c0a1000-281d-4b48-b2a7-f15579a1c38f")
+        private val currentTimeCharUUID = UUID.fromString("00002A2B-0000-1000-8000-00805f9b34fb")
+        private val integerCharUUID = UUID.fromString("3c0a1001-281d-4b48-b2a7-f15579a1c38f")
+        private val temperatureCharUUID = UUID.fromString("3c0a1002-281d-4b48-b2a7-f15579a1c38f")
+        private val buttonClickCharUUID = UUID.fromString("3c0a1003-281d-4b48-b2a7-f15579a1c38f")
     }
 
 }
