@@ -2,6 +2,7 @@ package ch.heigvd.iict.dma.labo4.ble
 
 import android.bluetooth.BluetoothGatt
 import android.bluetooth.BluetoothGattCharacteristic
+import android.bluetooth.BluetoothGattCharacteristic.*
 import android.bluetooth.BluetoothGattService
 import android.content.Context
 import android.util.Log
@@ -22,12 +23,11 @@ class DMABleManager(applicationContext: Context, private val dmaServiceListener:
         this.disconnect().enqueue()
     }
 
-
     private var servicesMap = mutableMapOf(
         timeServiceUUID to timeService,
         symServiceUUID to symService
     )
-    private var charMap = mutableMapOf(
+    private var characteristicsMap = mutableMapOf(
         currentTimeCharUUID to currentTimeChar,
         integerCharUUID to integerChar,
         temperatureCharUUID to temperatureChar,
@@ -37,34 +37,40 @@ class DMABleManager(applicationContext: Context, private val dmaServiceListener:
 
         Log.d(TAG, "isRequiredServiceSupported - discovered services:")
         for (service in gatt.services) {
-            Log.d(TAG, service.uuid.toString())
-            val bluetoothGattService = BluetoothGattService(service.uuid, service.type)
+            if(!servicesMap.containsKey(service.uuid)) // Treats only specific services
+                continue
+            Log.d(TAG + "service", service.uuid.toString())
 
-            servicesMap[service.uuid] = bluetoothGattService
-
+            // Add the service to the services map
+            servicesMap[service.uuid] = BluetoothGattService(service.uuid, service.type)
 
             for (characteristic in service.characteristics) {
-                Log.d(TAG, characteristic.uuid.toString())
-                val bluetoothGattCharacteristic = BluetoothGattCharacteristic(characteristic.uuid, characteristic.properties, characteristic.permissions)
+                if(!characteristicsMap.containsKey(characteristic.uuid)) // Treats only specific services
+                    continue
+                Log.d(TAG + "characteristic", characteristic.uuid.toString())
 
-                charMap[characteristic.uuid] = bluetoothGattCharacteristic
-
-
+                // Add the characteristic to the characteristics map
+                characteristicsMap[characteristic.uuid] = BluetoothGattCharacteristic(characteristic.uuid, characteristic.properties, characteristic.permissions)
             }
         }
 
+        // Check that all services and characteristics are present
+        if(servicesMap.containsValue(null) or characteristicsMap.containsValue(null)) {
+            Log.e(TAG, "This device doesn't have our use requirement")
+            return false
+        }
 
-
-        /* TODO
-            - Nous devons vérifier ici que le périphérique auquel on vient de se connecter possède
-              bien tous les services et les caractéristiques attendus, on vérifiera aussi que les
-              caractéristiques présentent bien les opérations attendues
-            - On en profitera aussi pour garder les références vers les différents services et
-              caractéristiques (déclarés en lignes 14 à 19)
-        */
-
-        return false //FIXME si tout est OK, on doit retourner true
-        // sinon la librairie appelera la méthode onDeviceDisconnected() avec le flag REASON_NOT_SUPPORTED
+        // Check that each characteristic has the required functionalities
+        return (
+                // Current time requirements
+                hasProperties(currentTimeChar!!, (PROPERTY_NOTIFY or PROPERTY_WRITE)) and
+                // Temperature requirements
+                hasProperties(temperatureChar!!, PROPERTY_READ) and
+                // Integer requirements
+                hasProperties(integerChar!!, PROPERTY_WRITE) and
+                // Button click requirements
+                hasProperties(buttonClickChar!!, PROPERTY_NOTIFY)
+                )
     }
 
     override fun initialize() {
@@ -76,6 +82,10 @@ class DMABleManager(applicationContext: Context, private val dmaServiceListener:
             caractéristiques, on en profitera aussi pour mettre en place les callbacks correspondants.
             CF. méthodes setNotificationCallback().with{} et enableNotifications().enqueue()
          */
+    }
+
+    private fun hasProperties(characteristic: BluetoothGattCharacteristic, requiredProperties: Int) : Boolean {
+        return (characteristic.properties and requiredProperties == requiredProperties)
     }
 
     override fun onServicesInvalidated() {
