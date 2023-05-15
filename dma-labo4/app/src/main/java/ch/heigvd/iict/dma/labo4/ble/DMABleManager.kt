@@ -10,36 +10,27 @@ import no.nordicsemi.android.ble.BleManager
 import java.util.*
 
 class DMABleManager(applicationContext: Context, private val dmaServiceListener: DMAServiceListener? = null) : BleManager(applicationContext) {
-
-    //Services and Characteristics of the SYM Pixl
-    private var timeService: BluetoothGattService? = null
-    private var symService: BluetoothGattService? = null
-    private var currentTimeChar: BluetoothGattCharacteristic? = null
-    private var integerChar: BluetoothGattCharacteristic? = null
-    private var temperatureChar: BluetoothGattCharacteristic? = null
-    private var buttonClickChar: BluetoothGattCharacteristic? = null
-
+    private var servicesMap:  MutableMap<UUID, BluetoothGattService?> = mutableMapOf(
+        timeServiceUUID to null,
+        symServiceUUID to null
+    )
+    private var characteristicsMap: MutableMap<UUID, BluetoothGattCharacteristic?> = mutableMapOf(
+        currentTimeCharUUID to null,
+        integerCharUUID to null,
+        temperatureCharUUID to null,
+        buttonClickCharUUID to null
+    )
     fun requestDisconnection() {
         this.disconnect().enqueue()
     }
 
-    private var servicesMap = mutableMapOf(
-        timeServiceUUID to timeService,
-        symServiceUUID to symService
-    )
-    private var characteristicsMap = mutableMapOf(
-        currentTimeCharUUID to currentTimeChar,
-        integerCharUUID to integerChar,
-        temperatureCharUUID to temperatureChar,
-        buttonClickCharUUID to buttonClickChar
-    )
     override fun isRequiredServiceSupported(gatt: BluetoothGatt): Boolean {
 
         Log.d(TAG, "isRequiredServiceSupported - discovered services:")
         for (service in gatt.services) {
             if(!servicesMap.containsKey(service.uuid)) // Treats only specific services
                 continue
-            Log.d(TAG + "service", service.uuid.toString())
+            Log.d("$TAG : service", service.uuid.toString())
 
             // Add the service to the services map
             servicesMap[service.uuid] = BluetoothGattService(service.uuid, service.type)
@@ -47,7 +38,7 @@ class DMABleManager(applicationContext: Context, private val dmaServiceListener:
             for (characteristic in service.characteristics) {
                 if(!characteristicsMap.containsKey(characteristic.uuid)) // Treats only specific services
                     continue
-                Log.d(TAG + "characteristic", characteristic.uuid.toString())
+                Log.d("$TAG : characteristic", characteristic.uuid.toString())
 
                 // Add the characteristic to the characteristics map
                 characteristicsMap[characteristic.uuid] = BluetoothGattCharacteristic(characteristic.uuid, characteristic.properties, characteristic.permissions)
@@ -60,16 +51,25 @@ class DMABleManager(applicationContext: Context, private val dmaServiceListener:
             return false
         }
 
+        // Set references to the services and characteristics
+        servicesMap[timeServiceUUID] = servicesMap[timeServiceUUID]
+        servicesMap[symServiceUUID] = servicesMap[symServiceUUID]
+        characteristicsMap[currentTimeCharUUID] = characteristicsMap[currentTimeCharUUID]
+        characteristicsMap[integerCharUUID] = characteristicsMap[integerCharUUID]
+        characteristicsMap[temperatureCharUUID] = characteristicsMap[temperatureCharUUID]
+        characteristicsMap[buttonClickCharUUID] = characteristicsMap[buttonClickCharUUID]
+
+
         // Check that each characteristic has the required functionalities
         return (
                 // Current time requirements
-                hasProperties(currentTimeChar!!, (PROPERTY_NOTIFY or PROPERTY_WRITE)) and
-                // Temperature requirements
-                hasProperties(temperatureChar!!, PROPERTY_READ) and
-                // Integer requirements
-                hasProperties(integerChar!!, PROPERTY_WRITE) and
-                // Button click requirements
-                hasProperties(buttonClickChar!!, PROPERTY_NOTIFY)
+                hasProperties(characteristicsMap[currentTimeCharUUID]!!, (PROPERTY_NOTIFY or PROPERTY_WRITE)) and
+                        // Temperature requirements
+                        hasProperties(characteristicsMap[temperatureCharUUID]!!, PROPERTY_READ) and
+                        // Integer requirements
+                        hasProperties(characteristicsMap[integerCharUUID]!!, PROPERTY_WRITE) and
+                        // Button click requirements
+                        hasProperties(characteristicsMap[buttonClickCharUUID]!!, PROPERTY_NOTIFY)
                 )
     }
 
@@ -82,6 +82,7 @@ class DMABleManager(applicationContext: Context, private val dmaServiceListener:
             caractéristiques, on en profitera aussi pour mettre en place les callbacks correspondants.
             CF. méthodes setNotificationCallback().with{} et enableNotifications().enqueue()
          */
+
     }
 
     private fun hasProperties(characteristic: BluetoothGattCharacteristic, requiredProperties: Int) : Boolean {
@@ -90,13 +91,13 @@ class DMABleManager(applicationContext: Context, private val dmaServiceListener:
 
     override fun onServicesInvalidated() {
         super.onServicesInvalidated()
+
         //we reset services and characteristics
-        timeService = null
-        currentTimeChar = null
-        symService = null
-        integerChar = null
-        temperatureChar = null
-        buttonClickChar = null
+        for(service in servicesMap)
+            servicesMap[service.key] = null
+
+        for(characteristic in characteristicsMap)
+            characteristicsMap[characteristic.key] = null
     }
 
     fun readTemperature(): Boolean {
