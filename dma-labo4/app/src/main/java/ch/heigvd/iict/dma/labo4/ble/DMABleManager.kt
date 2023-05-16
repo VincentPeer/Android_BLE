@@ -7,6 +7,7 @@ import android.bluetooth.BluetoothGattService
 import android.content.Context
 import android.util.Log
 import no.nordicsemi.android.ble.BleManager
+import no.nordicsemi.android.ble.data.Data
 import java.util.*
 
 class DMABleManager(applicationContext: Context, private val dmaServiceListener: DMAServiceListener? = null) : BleManager(applicationContext) {
@@ -25,7 +26,6 @@ class DMABleManager(applicationContext: Context, private val dmaServiceListener:
     }
 
     override fun isRequiredServiceSupported(gatt: BluetoothGatt): Boolean {
-
         Log.d(TAG, "isRequiredServiceSupported - discovered services:")
         for (service in gatt.services) {
             if(!servicesMap.containsKey(service.uuid)) // Treats only specific services
@@ -51,14 +51,6 @@ class DMABleManager(applicationContext: Context, private val dmaServiceListener:
             return false
         }
 
-        // Set references to the services and characteristics
-        servicesMap[timeServiceUUID] = servicesMap[timeServiceUUID]
-        servicesMap[symServiceUUID] = servicesMap[symServiceUUID]
-        characteristicsMap[currentTimeCharUUID] = characteristicsMap[currentTimeCharUUID]
-        characteristicsMap[integerCharUUID] = characteristicsMap[integerCharUUID]
-        characteristicsMap[temperatureCharUUID] = characteristicsMap[temperatureCharUUID]
-        characteristicsMap[buttonClickCharUUID] = characteristicsMap[buttonClickCharUUID]
-
 
         // Check that each characteristic has the required functionalities
         return (
@@ -76,15 +68,37 @@ class DMABleManager(applicationContext: Context, private val dmaServiceListener:
     override fun initialize() {
         super.initialize()
         /* TODO
-            Ici nous somme sûr que le périphérique possède bien tous les services et caractéristiques
-            attendus et que nous y sommes connectés. Nous pouvous effectuer les premiers échanges BLE.
             Dans notre cas il s'agit de s'enregistrer pour recevoir les notifications proposées par certaines
             caractéristiques, on en profitera aussi pour mettre en place les callbacks correspondants.
             CF. méthodes setNotificationCallback().with{} et enableNotifications().enqueue()
          */
+        setNotificationCallback(characteristicsMap[buttonClickCharUUID]).with {_, data ->
+            Log.d(TAG, " : button click notification : $data")
+            dmaServiceListener?.clickCountUpdate(data.getIntValue(Data.FORMAT_UINT8,0)!!)
+            print(" : button click notification : $data")
+        }
+        enableNotifications(characteristicsMap[buttonClickCharUUID]).enqueue()
 
+        setNotificationCallback(characteristicsMap[currentTimeCharUUID]).with { _, data ->
+            Log.d(TAG, " : current time notification : $data")
+            val year = data.getIntValue(Data.FORMAT_UINT16_LE, 0) // Exemple : Les 2 premiers octets représentent l'année (format UINT16)
+            val month = data.getIntValue(Data.FORMAT_UINT8, 2) // - 1 // Exemple : Le 3ème octet représente le mois (format UINT8)
+            val day = data.getIntValue(Data.FORMAT_UINT8, 3) // Exemple : Le 4ème octet représente le jour (format UINT8)
+            val hour = data.getIntValue(Data.FORMAT_UINT8, 4) // Exemple : Le 5ème octet représente l'heure (format UINT8)
+            val minute = data.getIntValue(Data.FORMAT_UINT8, 5) // Exemple : Le 6ème octet représente les minutes (format UINT8)
+            val second = data.getIntValue(Data.FORMAT_UINT8, 6) // Exemple : Le 7ème octet représente les secondes (format UINT8)
+
+            val calendar = Calendar.getInstance()
+            calendar.set(year!!, month!!, day!!, hour!!, minute!!, second!!)
+
+            dmaServiceListener?.dateUpdate(calendar)
+        }
+        enableNotifications(characteristicsMap[currentTimeCharUUID]).enqueue()
     }
 
+    /**
+     *
+     */
     private fun hasProperties(characteristic: BluetoothGattCharacteristic, requiredProperties: Int) : Boolean {
         return (characteristic.properties and requiredProperties == requiredProperties)
     }
@@ -92,7 +106,7 @@ class DMABleManager(applicationContext: Context, private val dmaServiceListener:
     override fun onServicesInvalidated() {
         super.onServicesInvalidated()
 
-        //we reset services and characteristics
+        // Reset services and characteristics
         for(service in servicesMap)
             servicesMap[service.key] = null
 
@@ -109,8 +123,13 @@ class DMABleManager(applicationContext: Context, private val dmaServiceListener:
             On placera des méthodes similaires pour les autres opérations
                 Cf. méthode writeCharacteristic().enqueue()
         */
+        readCharacteristic(characteristicsMap[temperatureCharUUID]).with{ _, d ->
+            dmaServiceListener?.temperatureUpdate(d.getIntValue(Data.FORMAT_UINT16_LE, 0)?.div(10f)!!)
+            Log.d(TAG, " : temperature read : ${d.getIntValue(Data.FORMAT_UINT16_LE, 0)?.div(10f)!!}")
+        }.enqueue()
 
-        return false //FIXME
+        //return false //FIXME
+        return true
     }
 
     companion object {

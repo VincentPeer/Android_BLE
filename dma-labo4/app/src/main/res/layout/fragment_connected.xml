@@ -7,5 +7,17 @@
     tools:context=".MainActivity">
 
     <!-- TODO vous placerez dans ce layout toutes les vues nécessaires aux intéractions avec le périphérique BLE -->
-
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:text="Connected"
+        android:textSize="30sp"
+        />
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/ble_sendvalue_value"
+        android:text="@string/ble_sendvalue_value"
+        android:textSize="30sp"
+        />
 </androidx.constraintlayout.widget.ConstraintLayout>
