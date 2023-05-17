@@ -4,22 +4,32 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:layout_marginStart="@dimen/page_margin"
     tools:context=".MainActivity">
 
     <!-- TODO vous placerez dans ce layout toutes les vues nécessaires aux intéractions avec le périphérique BLE -->
+
+    <androidx.constraintlayout.widget.Barrier
+        android:id="@+id/widgets_barrier"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:barrierDirection="end"
+        app:barrierMargin="@dimen/barrier_margin"
+        app:constraint_referenced_ids="temperature_request_button, set_current_time_button"/>
+
     <TextView
         android:id="@+id/title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
         android:text="@string/connected"
-        android:textSize="30sp"
-
+        android:textSize="20sp"
         />
 
     <Button
-        android:id="@+id/temperature_request"
+        android:id="@+id/temperature_request_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:layout_constraintTop_toBottomOf="@+id/title"
@@ -31,10 +41,78 @@
         android:id="@+id/temperature_value"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:layout_constraintTop_toTopOf="@+id/temperature_request"
-        app:layout_constraintLeft_toRightOf="@+id/temperature_request"
-        android:text="@string/temperature_def_value"
+        app:layout_constraintStart_toEndOf="@id/widgets_barrier"
+
+        app:layout_constraintBaseline_toBaselineOf="@+id/temperature_request_button"
+
         />
+
+    <TextView
+        android:id="@+id/device_current_time_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@+id/temperature_request_button"
+        app:layout_constraintStart_toStartOf="parent"
+        android:paddingTop="@dimen/vertical_padding"
+        android:text="@string/device_current_time_title"
+        />
+
+    <TextView
+        android:id="@+id/device_current_time"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@+id/device_current_time_title"
+        app:layout_constraintStart_toStartOf="parent"
+        android:paddingTop="@dimen/vertical_padding"
+        android:text="@string/device_current_time"
+        />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/set_current_time_button"
+        app:layout_constraintTop_toBottomOf="@+id/device_current_time"
+        app:layout_constraintStart_toStartOf="parent"
+        android:text="@string/set_current_time"
+        android:layout_marginTop="@dimen/vertical_padding"
+        />
+
+    <TextView
+        android:id="@+id/pressed_button_counter"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@+id/set_current_time_button"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginTop="@dimen/vertical_padding"
+        android:text="@string/pressed_button_counter"
+        />
+
+    <TextView
+        android:id="@+id/pressed_button_counter_value"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toEndOf="@+id/pressed_button_counter"
+        app:layout_constraintBaseline_toBaselineOf="@+id/pressed_button_counter"
+        android:layout_marginStart="10dp"
+        />
+    <TextView
+        android:id="@+id/send_integer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@+id/pressed_button_counter"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginTop="@dimen/vertical_padding"
+        android:text="@string/integer_to_send"
+        />
+
+    <EditText
+        android:layout_width="@dimen/edit_text_width"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/send_integer"
+        android:inputType="number"
+        />
+
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

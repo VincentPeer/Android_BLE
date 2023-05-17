@@ -22,7 +22,6 @@ class DMABleManager(applicationContext: Context, private val dmaServiceListener:
         buttonClickCharUUID to null
     )
 
-    var temp: Int = 0
     fun requestDisconnection() {
         this.disconnect().enqueue()
     }
@@ -76,16 +75,15 @@ class DMABleManager(applicationContext: Context, private val dmaServiceListener:
          */
 
 
-        setNotificationCallback(characteristicsMap[buttonClickCharUUID]).with {_, data ->
+        setNotificationCallback(characteristicsMap[buttonClickCharUUID]).with { _, data ->
             Log.d(TAG, " : button click notification : $data")
             dmaServiceListener?.clickCountUpdate(data.getIntValue(Data.FORMAT_UINT8,0)!!)
         }
         enableNotifications(characteristicsMap[buttonClickCharUUID]).enqueue()
 
         setNotificationCallback(characteristicsMap[currentTimeCharUUID]).with { _, data ->
-            Log.d(TAG, " : current time notification : $data")
             val year = data.getIntValue(Data.FORMAT_UINT16_LE, 0)
-            val month = data.getIntValue(Data.FORMAT_UINT8, 2)
+            val month = data.getIntValue(Data.FORMAT_UINT8, 2)?.minus(1)
             val day = data.getIntValue(Data.FORMAT_UINT8, 3)
             val hour = data.getIntValue(Data.FORMAT_UINT8, 4)
             val minute = data.getIntValue(Data.FORMAT_UINT8, 5)
@@ -93,15 +91,13 @@ class DMABleManager(applicationContext: Context, private val dmaServiceListener:
 
             val calendar = Calendar.getInstance()
             calendar.set(year!!, month!!, day!!, hour!!, minute!!, second!!)
+            Log.d(TAG, " : current time notification : ${calendar.time}")
 
-            dmaServiceListener?.dateUpdate(calendar)
+            dmaServiceListener?.dateUpdate(calendar) // TODO voir si l'affectation est complète
         }
         enableNotifications(characteristicsMap[currentTimeCharUUID]).enqueue()
     }
 
-    /**
-     *
-     */
     private fun hasProperties(characteristic: BluetoothGattCharacteristic, requiredProperties: Int) : Boolean {
         return (characteristic.properties and requiredProperties == requiredProperties)
     }
@@ -128,13 +124,34 @@ class DMABleManager(applicationContext: Context, private val dmaServiceListener:
         */
 
         readCharacteristic(characteristicsMap[temperatureCharUUID]).with { _, data ->
-            temp = data.getIntValue(Data.FORMAT_UINT16_LE, 0)!! // TODO
+            val temp = data.getIntValue(Data.FORMAT_UINT16_LE, 0)?.div(10f)// TODO
             Log.d(TAG, " : temperature read : $temp")
-            dmaServiceListener?.temperatureUpdate(temp / 10f)
+            dmaServiceListener?.temperatureUpdate(temp!!)
         }.enqueue()
 
-
         //return false //FIXME
+        return true
+    }
+
+    fun writeCurrentTime() : Boolean {
+        val calendar = Calendar.getInstance()
+        val year = calendar.get(Calendar.YEAR)
+        val month = calendar.get(Calendar.MONTH) + 1
+        val day = calendar.get(Calendar.DAY_OF_MONTH)
+        val hour = calendar.get(Calendar.HOUR_OF_DAY)
+        val minute = calendar.get(Calendar.MINUTE)
+        val second = calendar.get(Calendar.SECOND)
+
+        val data = ByteArray(7)
+        data[0] = (year and 0xFF).toByte()
+        data[1] = ((year shr 8) and 0xFF).toByte()
+        data[2] = (month and 0xFF).toByte()
+        data[3] = (day and 0xFF).toByte()
+        data[4] = (hour and 0xFF).toByte()
+        data[5] = (minute and 0xFF).toByte()
+        data[6] = (second and 0xFF).toByte()
+
+        writeCharacteristic(characteristicsMap[currentTimeCharUUID], data).enqueue()
         return true
     }
 

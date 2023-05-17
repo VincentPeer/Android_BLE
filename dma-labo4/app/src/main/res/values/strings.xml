@@ -16,8 +16,14 @@
     <string name="ble_sendvalue_send">Send</string>
 
 
-    <string name="connected">Connected</string>
-    <string name="temperature_request">Request temperature</string>
+    <string name="connected">Device services</string>
+    <string name="temperature_request">Temperature request</string>
     <string name="temperature_def_value">0.0</string>
+    <string name="device_current_time_title">Device current time : </string>
+    <string name="device_current_time">time</string>
+    <string name="set_current_time">Set current time</string>
+    <string name="pressed_button_counter">Pressed button counter</string>
+    <string name="integer_to_send">Integer to send</string>
+
 
 </resources>

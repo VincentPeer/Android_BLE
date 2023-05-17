@@ -91,9 +91,8 @@ class BleViewModel(application: Application) : AndroidViewModel(application), DM
     //
     fun setTime(): Boolean {
         if (!isConnected.value!!) return false
+        else return ble.writeCurrentTime()
         // TODO send a current datetime value
-
-        return false
     }
 
     fun sendValue(value: Int): Boolean {

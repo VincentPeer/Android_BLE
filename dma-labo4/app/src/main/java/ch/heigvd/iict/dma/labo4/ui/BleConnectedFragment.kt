@@ -26,10 +26,24 @@ class BleConnectedFragment : Fragment(), MenuProvider {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         // TODO implement connected fragment
-        binding.temperatureRequest.setOnClickListener {
+        binding.temperatureRequestButton.setOnClickListener {
             bleViewModel.readTemperature()
             binding.temperatureValue.text = bleViewModel.temperature.value.toString()
         }
+
+        // Current time setting by extracting time from the calendar
+//        val deviceTime = bleViewModel.currentTime.value?.get(Calendar.HOUR_OF_DAY).toString() + ":" +
+//                bleViewModel.currentTime.value?.get(Calendar.MINUTE).toString() + ":" +
+//                bleViewModel.currentTime.value?.get(Calendar.SECOND)
+        val deviceTime = bleViewModel.currentTime.value?.time
+        binding.deviceCurrentTime.text = deviceTime.toString()
+
+        binding.setCurrentTimeButton.setOnClickListener {
+            bleViewModel.setTime()
+        }
+
+        // Button click
+        binding.pressedButtonCounterValue.text = bleViewModel.buttonClick.value.toString()
     }
 
     override fun onResume() {
@@ -60,5 +74,4 @@ class BleConnectedFragment : Fragment(), MenuProvider {
         @JvmStatic
         fun newInstance() = BleConnectedFragment()
     }
-
 }
