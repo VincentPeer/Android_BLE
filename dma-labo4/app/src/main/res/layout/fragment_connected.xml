@@ -8,16 +8,33 @@
 
     <!-- TODO vous placerez dans ce layout toutes les vues nécessaires aux intéractions avec le périphérique BLE -->
     <TextView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="Connected"
+        android:id="@+id/title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        android:text="@string/connected"
         android:textSize="30sp"
+
         />
+
+    <Button
+        android:id="@+id/temperature_request"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@+id/title"
+        app:layout_constraintLeft_toLeftOf="parent"
+        android:text="@string/temperature_request"
+        />
+
     <TextView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:id="@+id/ble_sendvalue_value"
-        android:text="@string/ble_sendvalue_value"
-        android:textSize="30sp"
+        android:id="@+id/temperature_value"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toTopOf="@+id/temperature_request"
+        app:layout_constraintLeft_toRightOf="@+id/temperature_request"
+        android:text="@string/temperature_def_value"
         />
+
+
 </androidx.constraintlayout.widget.ConstraintLayout>

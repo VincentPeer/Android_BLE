@@ -14,6 +14,10 @@
     <string name="ble_temperature_read">Read</string>
     <string name="ble_sendvalue_title">Envoi de valeur</string>
     <string name="ble_sendvalue_send">Send</string>
-    <string name="ble_sendvalue_value">Value</string>
+
+
+    <string name="connected">Connected</string>
+    <string name="temperature_request">Request temperature</string>
+    <string name="temperature_def_value">0.0</string>
 
 </resources>

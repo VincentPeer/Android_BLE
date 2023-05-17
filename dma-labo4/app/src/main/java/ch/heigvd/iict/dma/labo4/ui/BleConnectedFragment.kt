@@ -26,6 +26,10 @@ class BleConnectedFragment : Fragment(), MenuProvider {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         // TODO implement connected fragment
+        binding.temperatureRequest.setOnClickListener {
+            bleViewModel.readTemperature()
+            binding.temperatureValue.text = bleViewModel.temperature.value.toString()
+        }
     }
 
     override fun onResume() {

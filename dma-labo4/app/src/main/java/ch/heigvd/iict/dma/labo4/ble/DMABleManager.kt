@@ -21,6 +21,8 @@ class DMABleManager(applicationContext: Context, private val dmaServiceListener:
         temperatureCharUUID to null,
         buttonClickCharUUID to null
     )
+
+    var temp: Int = 0
     fun requestDisconnection() {
         this.disconnect().enqueue()
     }
@@ -33,15 +35,15 @@ class DMABleManager(applicationContext: Context, private val dmaServiceListener:
             Log.d("$TAG : service", service.uuid.toString())
 
             // Add the service to the services map
-            servicesMap[service.uuid] = BluetoothGattService(service.uuid, service.type)
+            servicesMap[service.uuid] = service
 
             for (characteristic in service.characteristics) {
-                if(!characteristicsMap.containsKey(characteristic.uuid)) // Treats only specific services
+                if(!characteristicsMap.containsKey(characteristic.uuid)) // Treats only specific characteristics
                     continue
                 Log.d("$TAG : characteristic", characteristic.uuid.toString())
 
                 // Add the characteristic to the characteristics map
-                characteristicsMap[characteristic.uuid] = BluetoothGattCharacteristic(characteristic.uuid, characteristic.properties, characteristic.permissions)
+                characteristicsMap[characteristic.uuid] = characteristic
             }
         }
 
@@ -72,21 +74,22 @@ class DMABleManager(applicationContext: Context, private val dmaServiceListener:
             caractéristiques, on en profitera aussi pour mettre en place les callbacks correspondants.
             CF. méthodes setNotificationCallback().with{} et enableNotifications().enqueue()
          */
+
+
         setNotificationCallback(characteristicsMap[buttonClickCharUUID]).with {_, data ->
             Log.d(TAG, " : button click notification : $data")
             dmaServiceListener?.clickCountUpdate(data.getIntValue(Data.FORMAT_UINT8,0)!!)
-            print(" : button click notification : $data")
         }
         enableNotifications(characteristicsMap[buttonClickCharUUID]).enqueue()
 
         setNotificationCallback(characteristicsMap[currentTimeCharUUID]).with { _, data ->
             Log.d(TAG, " : current time notification : $data")
-            val year = data.getIntValue(Data.FORMAT_UINT16_LE, 0) // Exemple : Les 2 premiers octets représentent l'année (format UINT16)
-            val month = data.getIntValue(Data.FORMAT_UINT8, 2) // - 1 // Exemple : Le 3ème octet représente le mois (format UINT8)
-            val day = data.getIntValue(Data.FORMAT_UINT8, 3) // Exemple : Le 4ème octet représente le jour (format UINT8)
-            val hour = data.getIntValue(Data.FORMAT_UINT8, 4) // Exemple : Le 5ème octet représente l'heure (format UINT8)
-            val minute = data.getIntValue(Data.FORMAT_UINT8, 5) // Exemple : Le 6ème octet représente les minutes (format UINT8)
-            val second = data.getIntValue(Data.FORMAT_UINT8, 6) // Exemple : Le 7ème octet représente les secondes (format UINT8)
+            val year = data.getIntValue(Data.FORMAT_UINT16_LE, 0)
+            val month = data.getIntValue(Data.FORMAT_UINT8, 2)
+            val day = data.getIntValue(Data.FORMAT_UINT8, 3)
+            val hour = data.getIntValue(Data.FORMAT_UINT8, 4)
+            val minute = data.getIntValue(Data.FORMAT_UINT8, 5)
+            val second = data.getIntValue(Data.FORMAT_UINT8, 6)
 
             val calendar = Calendar.getInstance()
             calendar.set(year!!, month!!, day!!, hour!!, minute!!, second!!)
@@ -117,16 +120,19 @@ class DMABleManager(applicationContext: Context, private val dmaServiceListener:
     fun readTemperature(): Boolean {
         /* TODO
             on peut effectuer ici la lecture de la caractéristique température
-            la valeur récupérée sera envoyée à au ViewModel en utilisant le mécanisme
+            la valeur récupérée sera envoyée au ViewModel en utilisant le mécanisme
             du DMAServiceListener: Cf. temperatureUpdate()
                 Cf. méthode readCharacteristic().with{}.enqueue()
             On placera des méthodes similaires pour les autres opérations
                 Cf. méthode writeCharacteristic().enqueue()
         */
-        readCharacteristic(characteristicsMap[temperatureCharUUID]).with{ _, d ->
-            dmaServiceListener?.temperatureUpdate(d.getIntValue(Data.FORMAT_UINT16_LE, 0)?.div(10f)!!)
-            Log.d(TAG, " : temperature read : ${d.getIntValue(Data.FORMAT_UINT16_LE, 0)?.div(10f)!!}")
+
+        readCharacteristic(characteristicsMap[temperatureCharUUID]).with { _, data ->
+            temp = data.getIntValue(Data.FORMAT_UINT16_LE, 0)!! // TODO
+            Log.d(TAG, " : temperature read : $temp")
+            dmaServiceListener?.temperatureUpdate(temp / 10f)
         }.enqueue()
+
 
         //return false //FIXME
         return true
