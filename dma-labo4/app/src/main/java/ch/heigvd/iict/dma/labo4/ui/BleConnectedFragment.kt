@@ -25,25 +25,29 @@ class BleConnectedFragment : Fragment(), MenuProvider {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        bleViewModel.temperature.observe(viewLifecycleOwner) {
+            binding.temperatureValue.text = bleViewModel.temperature.value.toString()
+        }
+        bleViewModel.currentTime.observe(viewLifecycleOwner) {
+            binding.deviceCurrentTime.text = bleViewModel.currentTime.value?.time.toString()
+        }
+        bleViewModel.buttonClick.observe(viewLifecycleOwner) {
+            binding.pressedButtonCounterValue.text = bleViewModel.buttonClick.value.toString()
+        }
+
         // TODO implement connected fragment
         binding.temperatureRequestButton.setOnClickListener {
             bleViewModel.readTemperature()
-            binding.temperatureValue.text = bleViewModel.temperature.value.toString()
         }
-
-        // Current time setting by extracting time from the calendar
-//        val deviceTime = bleViewModel.currentTime.value?.get(Calendar.HOUR_OF_DAY).toString() + ":" +
-//                bleViewModel.currentTime.value?.get(Calendar.MINUTE).toString() + ":" +
-//                bleViewModel.currentTime.value?.get(Calendar.SECOND)
-        val deviceTime = bleViewModel.currentTime.value?.time
-        binding.deviceCurrentTime.text = deviceTime.toString()
 
         binding.setCurrentTimeButton.setOnClickListener {
             bleViewModel.setTime()
         }
 
-        // Button click
-        binding.pressedButtonCounterValue.text = bleViewModel.buttonClick.value.toString()
+        binding.sendIntegerButton.setOnClickListener {
+            bleViewModel.sendValue(Integer.parseInt(binding.integerInput.text.toString()))
+        }
     }
 
     override fun onResume() {

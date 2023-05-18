@@ -98,7 +98,7 @@ class BleViewModel(application: Application) : AndroidViewModel(application), DM
     fun sendValue(value: Int): Boolean {
         if (!isConnected.value!!) return false
         // TODO send a int value
-        return false
+        return ble.sendValue(value)
     }
 
     fun readTemperature(): Boolean {

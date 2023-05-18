@@ -106,11 +106,21 @@
         />
 
     <EditText
+        android:id="@+id/integer_input"
         android:layout_width="@dimen/edit_text_width"
         android:layout_height="wrap_content"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/send_integer"
         android:inputType="number"
+        />
+
+    <Button
+        android:id="@+id/send_integer_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/integer_input"
+        android:text="@string/send_integer"
         />
 
 

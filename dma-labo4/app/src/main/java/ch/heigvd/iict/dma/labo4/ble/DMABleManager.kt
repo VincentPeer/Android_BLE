@@ -8,6 +8,7 @@ import android.content.Context
 import android.util.Log
 import no.nordicsemi.android.ble.BleManager
 import no.nordicsemi.android.ble.data.Data
+import java.nio.ByteBuffer
 import java.util.*
 
 class DMABleManager(applicationContext: Context, private val dmaServiceListener: DMAServiceListener? = null) : BleManager(applicationContext) {
@@ -154,6 +155,14 @@ class DMABleManager(applicationContext: Context, private val dmaServiceListener:
         writeCharacteristic(characteristicsMap[currentTimeCharUUID], data).enqueue()
         return true
     }
+
+    fun sendValue(value: Int) :Boolean {
+        val data = ByteBuffer.allocate(4)
+        data.putInt(value) // TODO attention int et unit
+        writeCharacteristic(characteristicsMap[integerCharUUID], data.array())
+        return true
+    }
+
 
     companion object {
         private val TAG = DMABleManager::class.java.simpleName

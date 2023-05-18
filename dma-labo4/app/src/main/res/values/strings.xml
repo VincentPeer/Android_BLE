@@ -24,6 +24,7 @@
     <string name="set_current_time">Set current time</string>
     <string name="pressed_button_counter">Pressed button counter</string>
     <string name="integer_to_send">Integer to send</string>
+    <string name="send_integer">Send integer</string>
 
 
 </resources>
