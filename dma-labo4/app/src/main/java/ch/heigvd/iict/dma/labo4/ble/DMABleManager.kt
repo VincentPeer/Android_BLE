@@ -69,12 +69,6 @@ class DMABleManager(applicationContext: Context, private val dmaServiceListener:
 
     override fun initialize() {
         super.initialize()
-        /* TODO
-            Dans notre cas il s'agit de s'enregistrer pour recevoir les notifications proposées par certaines
-            caractéristiques, on en profitera aussi pour mettre en place les callbacks correspondants.
-            CF. méthodes setNotificationCallback().with{} et enableNotifications().enqueue()
-         */
-
 
         setNotificationCallback(characteristicsMap[buttonClickCharUUID]).with { _, data ->
             Log.d(TAG, " : button click notification : $data")
@@ -94,7 +88,7 @@ class DMABleManager(applicationContext: Context, private val dmaServiceListener:
             calendar.set(year!!, month!!, day!!, hour!!, minute!!, second!!)
             Log.d(TAG, " : current time notification : ${calendar.time}")
 
-            dmaServiceListener?.dateUpdate(calendar) // TODO voir si l'affectation est complète
+            dmaServiceListener?.dateUpdate(calendar)
         }
         enableNotifications(characteristicsMap[currentTimeCharUUID]).enqueue()
     }
@@ -115,26 +109,16 @@ class DMABleManager(applicationContext: Context, private val dmaServiceListener:
     }
 
     fun readTemperature(): Boolean {
-        /* TODO
-            on peut effectuer ici la lecture de la caractéristique température
-            la valeur récupérée sera envoyée au ViewModel en utilisant le mécanisme
-            du DMAServiceListener: Cf. temperatureUpdate()
-                Cf. méthode readCharacteristic().with{}.enqueue()
-            On placera des méthodes similaires pour les autres opérations
-                Cf. méthode writeCharacteristic().enqueue()
-        */
-
         readCharacteristic(characteristicsMap[temperatureCharUUID]).with { _, data ->
-            val temp = data.getIntValue(Data.FORMAT_UINT16_LE, 0)?.div(10f)// TODO
+            val temp = data.getIntValue(Data.FORMAT_UINT16_LE, 0)?.div(10f)
             Log.d(TAG, " : temperature read : $temp")
             dmaServiceListener?.temperatureUpdate(temp!!)
         }.enqueue()
 
-        //return false //FIXME
         return true
     }
 
-    fun writeCurrentTime() : Boolean {
+    fun sendCurrentTime() : Boolean {
         val calendar = Calendar.getInstance()
         val year = calendar.get(Calendar.YEAR)
         val month = calendar.get(Calendar.MONTH) + 1
@@ -153,13 +137,15 @@ class DMABleManager(applicationContext: Context, private val dmaServiceListener:
         data[6] = (second and 0xFF).toByte()
 
         writeCharacteristic(characteristicsMap[currentTimeCharUUID], data).enqueue()
+        // writeCharacteristic(characteristicsMap[currentTimeCharUUID], data, WRITE_TYPE_DEFAULT).enqueue()
         return true
     }
 
     fun sendValue(value: Int) :Boolean {
-        val data = ByteBuffer.allocate(4)
-        data.putInt(value) // TODO attention int et unit
-        writeCharacteristic(characteristicsMap[integerCharUUID], data.array())
+        val buffer = ByteBuffer.allocate(4)
+        buffer.putInt(value)
+
+        writeCharacteristic(characteristicsMap[integerCharUUID], Data(buffer.array()))
         return true
     }
 

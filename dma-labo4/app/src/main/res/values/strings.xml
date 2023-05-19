@@ -7,23 +7,19 @@
 
     <string name="ble_scan_results_empty">Veuillez lancer le scan <i>Bluetooth Low Energy</i> en appuyant ci-dessus</string>
 
-    <string name="ble_currenttime_title">Current time</string>
-    <string name="ble_currenttime_set">Set time</string>
-    <string name="ble_clickcounter_title">Click counter</string>
-    <string name="ble_temperature_title">Température</string>
-    <string name="ble_temperature_read">Read</string>
-    <string name="ble_sendvalue_title">Envoi de valeur</string>
-    <string name="ble_sendvalue_send">Send</string>
 
-
+    <!-- Title -->
     <string name="connected">Device services</string>
+
+    <!-- Subtitle -->
+    <string name="temperature_title">Temperature</string>
+    <string name="time_title">Time</string>
+    <string name="btn_click_counter_title">Button click counter</string>
+    <string name="send_int_title">Send integer</string>
+
+    <!-- Button text -->
     <string name="temperature_request">Temperature request</string>
-    <string name="temperature_def_value">0.0</string>
-    <string name="device_current_time_title">Device current time : </string>
-    <string name="device_current_time">time</string>
-    <string name="set_current_time">Set current time</string>
-    <string name="pressed_button_counter">Pressed button counter</string>
-    <string name="integer_to_send">Integer to send</string>
+    <string name="set_current_time">Update current time</string>
     <string name="send_integer">Send integer</string>
 
 

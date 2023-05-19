@@ -33,10 +33,9 @@ class BleConnectedFragment : Fragment(), MenuProvider {
             binding.deviceCurrentTime.text = bleViewModel.currentTime.value?.time.toString()
         }
         bleViewModel.buttonClick.observe(viewLifecycleOwner) {
-            binding.pressedButtonCounterValue.text = bleViewModel.buttonClick.value.toString()
+            binding.btnClickCounterValue.text = bleViewModel.buttonClick.value.toString()
         }
 
-        // TODO implement connected fragment
         binding.temperatureRequestButton.setOnClickListener {
             bleViewModel.readTemperature()
         }
@@ -46,7 +45,8 @@ class BleConnectedFragment : Fragment(), MenuProvider {
         }
 
         binding.sendIntegerButton.setOnClickListener {
-            bleViewModel.sendValue(Integer.parseInt(binding.integerInput.text.toString()))
+            if(binding.integerInput.text.isNotEmpty())
+                bleViewModel.sendValue(Integer.parseInt(binding.integerInput.text.toString()))
         }
     }
 
