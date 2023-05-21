@@ -105,8 +105,6 @@ class MainActivity : AppCompatActivity() {
             // we scan for any BLE device
             // we don't filter them based on advertised services...
 
-            // TODO ajouter un filtre pour n'afficher que les devices proposant
-            // le service "SYM" (UUID: "3c0a1000-281d-4b48-b2a7-f15579a1c38f")
             val uuid = UUID.fromString("3c0a1000-281d-4b48-b2a7-f15579a1c38f")
             val scanFilter = ScanFilter.Builder().setServiceUuid(ParcelUuid(uuid)).build()
 

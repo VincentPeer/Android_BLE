@@ -26,6 +26,7 @@ class BleConnectedFragment : Fragment(), MenuProvider {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        // Observe LiveData
         bleViewModel.temperature.observe(viewLifecycleOwner) {
             binding.temperatureValue.text = bleViewModel.temperature.value.toString()
         }
@@ -36,6 +37,7 @@ class BleConnectedFragment : Fragment(), MenuProvider {
             binding.btnClickCounterValue.text = bleViewModel.buttonClick.value.toString()
         }
 
+        // Set up buttons click listeners
         binding.temperatureRequestButton.setOnClickListener {
             bleViewModel.readTemperature()
         }

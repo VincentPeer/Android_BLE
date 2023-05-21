@@ -1,3 +1,10 @@
+/**
+ * DMA Laboratory 4
+ * @author      : Dimitri De Bleser, Vincent Peer
+ * Date         : 21.05.2023
+ * Description  : Manage the BLE devices scan, connection and communication
+ */
+
 package ch.heigvd.iict.dma.labo4.ble
 
 import android.bluetooth.BluetoothGatt
@@ -70,12 +77,14 @@ class DMABleManager(applicationContext: Context, private val dmaServiceListener:
     override fun initialize() {
         super.initialize()
 
+        // Set notification callback and enable the button click counter characteristic
         setNotificationCallback(characteristicsMap[buttonClickCharUUID]).with { _, data ->
             Log.d(TAG, " : button click notification : $data")
             dmaServiceListener?.clickCountUpdate(data.getIntValue(Data.FORMAT_UINT8,0)!!)
         }
         enableNotifications(characteristicsMap[buttonClickCharUUID]).enqueue()
 
+        // Set notification callback and enable the current time characteristic
         setNotificationCallback(characteristicsMap[currentTimeCharUUID]).with { _, data ->
             val year = data.getIntValue(Data.FORMAT_UINT16_LE, 0)
             val month = data.getIntValue(Data.FORMAT_UINT8, 2)?.minus(1)
@@ -142,7 +151,6 @@ class DMABleManager(applicationContext: Context, private val dmaServiceListener:
         writeCharacteristic(characteristicsMap[integerCharUUID], Data(buffer.array()), WRITE_TYPE_DEFAULT).enqueue()
         return true
     }
-
 
     companion object {
         private val TAG = DMABleManager::class.java.simpleName
