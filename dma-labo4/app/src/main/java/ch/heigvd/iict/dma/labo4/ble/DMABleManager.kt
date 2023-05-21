@@ -119,33 +119,27 @@ class DMABleManager(applicationContext: Context, private val dmaServiceListener:
     }
 
     fun sendCurrentTime() : Boolean {
-        val calendar = Calendar.getInstance()
-        val year = calendar.get(Calendar.YEAR)
-        val month = calendar.get(Calendar.MONTH) + 1
-        val day = calendar.get(Calendar.DAY_OF_MONTH)
-        val hour = calendar.get(Calendar.HOUR_OF_DAY)
-        val minute = calendar.get(Calendar.MINUTE)
-        val second = calendar.get(Calendar.SECOND)
+        val mask = 0xFF
+        val cal = Calendar.getInstance()
+        val data = ByteArray(8)
 
-        val data = ByteArray(7)
-        data[0] = (year and 0xFF).toByte()
-        data[1] = ((year shr 8) and 0xFF).toByte()
-        data[2] = (month and 0xFF).toByte()
-        data[3] = (day and 0xFF).toByte()
-        data[4] = (hour and 0xFF).toByte()
-        data[5] = (minute and 0xFF).toByte()
-        data[6] = (second and 0xFF).toByte()
+        data[0] = (cal.get(Calendar.YEAR) and mask).toByte()
+        data[1] = ((cal.get(Calendar.YEAR) shr 8) and mask).toByte()
+        data[2] = (cal.get(Calendar.MONTH).plus(1) and mask).toByte()
+        data[3] = (cal.get(Calendar.DAY_OF_MONTH) and mask).toByte()
+        data[4] = (cal.get(Calendar.HOUR_OF_DAY) and mask).toByte()
+        data[5] = (cal.get(Calendar.MINUTE) and mask).toByte()
+        data[6] = (cal.get(Calendar.SECOND) and mask).toByte()
+        data[7] = (cal.get(Calendar.DAY_OF_WEEK) and mask).toByte()
 
-        writeCharacteristic(characteristicsMap[currentTimeCharUUID], data).enqueue()
-        // writeCharacteristic(characteristicsMap[currentTimeCharUUID], data, WRITE_TYPE_DEFAULT).enqueue()
+        writeCharacteristic(characteristicsMap[currentTimeCharUUID], data, WRITE_TYPE_DEFAULT).enqueue()
         return true
     }
 
     fun sendValue(value: Int) :Boolean {
         val buffer = ByteBuffer.allocate(4)
         buffer.putInt(value)
-
-        writeCharacteristic(characteristicsMap[integerCharUUID], Data(buffer.array()))
+        writeCharacteristic(characteristicsMap[integerCharUUID], Data(buffer.array()), WRITE_TYPE_DEFAULT).enqueue()
         return true
     }
 
