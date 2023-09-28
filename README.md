@@ -1,4 +1,4 @@
-# DMA_Labo04
+# Laboratoire Android BLE
 
 ## Introduction 
 Ce laboratoire vous propose de réaliser une application mobile pouvant se connecter et communiquer
