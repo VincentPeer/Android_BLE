@@ -1,7 +1,7 @@
 # DMA_Labo04
 
 ## Introduction 
-Ce laboratoire propose de réaliser une application mobile utilisant des balises Bluetooth Low
-Energy, des iBeacons, pour se positionner en intérieur. Il s’agit de réaliser une application « utilitaire »
-permettant de tester cette technologie, en « conditions réelles », afin de pouvoir déterminer la
-position relative du smartphone.
+Ce laboratoire vous propose de réaliser une application mobile pouvant se connecter et communiquer
+avec un périphérique Bluetooth Low Energy. Ce laboratoire couvre la découverte des périphériques
+compatibles à proximité, la connexion entre le smartphone et un périphérique, ainsi que l’échange de
+données avec deux services BLE (1 standard et 1 custom).
